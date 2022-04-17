@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/task http://www.springframework.org/schema/context/spring-task.xsd
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/context/spring-aop.xsd
+       http://www.springframework.org/schema/util   http://www.springframework.org/schema/util/spring-util.xsd
+       ">
+
+    <context:component-scan
+            base-package="by.it_academy.jd2.m_jd2_88_22.chat.storage.memory,by.it_academy.jd2.m_jd2_88_22.chat.view,
+            by.it_academy.jd2.m_jd2_88_22.chat.storage.hibernate,by.it_academy.jd2.m_jd2_88_22.chat.storage.db,
+by.it_academy.jd2.m_jd2_88_22.chat.storage"/>
+
+
+    <context:property-placeholder location="classpath:/database.properties"/>
+
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <property name="driverClass" value="${jdbc.driverClassName}"/>
+        <property name="jdbcUrl" value="${jdbc.url}"/>
+        <property name="user" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+        <property name="minPoolSize" value="5"/>
+        <property name="maxPoolSize" value="10"/>
+    </bean>
+
+    <util:list id="availableFactory" value-type="by.it_academy.jd2.m_jd2_88_22.chat.storage.api.IFactoryStorage">
+        <ref bean="memoryFactoryStorage"/>
+        <ref bean="dbFactoryStorage"/>
+        <ref bean="hibernateFactoryStorage"/>
+
+    </util:list>
+
+
+    <bean id="factoryStorage" class="by.it_academy.jd2.m_jd2_88_22.chat.storage.api.FactoryStorage">
+        <constructor-arg name="list" ref="availableFactory"/>
+        <constructor-arg name="storageType" value="${choice}"/>
+    </bean>
+
+
+    <bean id="userStorage" factory-bean="factoryStorage" factory-method="getUserStorage">
+    </bean>
+
+    <bean id="messageStorage" factory-bean="factoryStorage" factory-method="getMessageStorage">
+    </bean>
+
+</beans>
